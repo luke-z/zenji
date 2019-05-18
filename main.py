@@ -164,7 +164,7 @@ def astar(grid, start, end):
             # the g value is increment by one
             child.g = current_node.g + 1
             # the h value consists of the sum of the x, y and amount of rotations of the child
-            child.h = child.position[0] + child.position[1] + child.rotations
+            child.h = (((child.position[0] - end_node.position[0]) ** 2) + ((child.position[1] - end_node.position[1]) ** 2)) * child.rotations
             # set f to be the sum of g and h
             child.f = child.g + child.h
 
