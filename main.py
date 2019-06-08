@@ -201,8 +201,8 @@ def main():
     #grid = fourByFourGrid()    
 
     ### Random grid generator
-    width = 7
-    height = 7
+    width = 4
+    height = 4
     grid = randomGrid(width, height)
 
     # add all positions to the fields
@@ -322,7 +322,4 @@ def randomGrid(w, h):
 
 # launcher
 if __name__ == '__main__':
-    main()
-    main()
-    main()
     main()
