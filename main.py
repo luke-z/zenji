@@ -1,4 +1,5 @@
 import numpy as np
+import random
 
 
 class Field():
@@ -24,6 +25,9 @@ class Field():
     def __eq__(self, other):
         return self.u == other.u and self.r == other.r and self.d == other.d and self.l == other.l and \
                self.position == other.position and self.rotations == other.rotations and self.parent == other.parent
+
+    def print(self):
+        return [[" ","%s" % (self.u)," "],["%s" % (self.l)," ","%s" % (self.r)],[" ","%s" % (self.d)," "]]
 
 
 def rotate(node, n):
@@ -71,25 +75,37 @@ def astar(grid, start, end):
                 current_node = node
                 current_index = index
 
-        # mvoe the current_node to the closed list
+        # move the current_node to the closed list
         open_list.pop(current_index)
         closed_list.append(current_node)
 
         # check if the goal has been reached
         the_end = False
-        if current_node.parent is not None:
-            # calculate the previous move: (1,0) is a downwards move, (0,1) is a rightwards move
-            previous_move = tuple(np.subtract(
-                (current_node.position), (current_node.parent.position)))
+        if current_node.position == end.position and current_node.parent is not None:
+            valid = True
 
-            # the parent needs to have a 2 pipe going to a 1 pipe of the current node
-            if previous_move == (1, 0):
-                the_end = current_node.u == 1 and current_node.parent.d == 2
-            if previous_move == (0, 1):
-                the_end = current_node.l == 1 and current_node.parent.r == 2
+            analysed_node = current_node
+
+            # go through all nodes to check if connections are valid
+            while analysed_node.parent is not None:
+                # calculate the previous move: (1,0) is a downwards move, (0,1) is a rightwards move
+                previous_move = tuple(np.subtract((analysed_node.position), (analysed_node.parent.position)))
+
+                # check if the current node and its parent are connected in a valid way
+                if previous_move == (1, 0):
+                    if not (analysed_node.u == 1 and analysed_node.parent.d == 2):
+                        valid = False
+                if previous_move == (0, 1):
+                    if not (analysed_node.l == 1 and analysed_node.parent.r == 2):
+                        valid = False
+
+                analysed_node = analysed_node.parent
+
+            if valid:
+                the_end = True
 
         # if the end of the grid has been reached and the check above is true
-        if current_node.position == end_node.position and the_end:
+        if the_end:
             path = []
             current = current_node
             # append the goal node
@@ -164,7 +180,7 @@ def astar(grid, start, end):
             # the g value is increment by one
             child.g = current_node.g + 1
             # the h value consists of the sum of the x, y and amount of rotations of the child
-            child.h = (((child.position[0] - end_node.position[0]) ** 2) + ((child.position[1] - end_node.position[1]) ** 2)) * child.rotations
+            child.h = (((child.position[0] - end_node.position[0]) ** 2) + ((child.position[1] - end_node.position[1]) ** 2)) ** child.rotations
             # set f to be the sum of g and h
             child.f = child.g + child.h
 
@@ -177,17 +193,85 @@ def astar(grid, start, end):
             open_list.append(child)
 
 
-def main():
-    # 2x2 Field
-    # fieldtl = Field(2, 1, 3, 2)
-    # fieldtr = Field(2, 2, 1, 1)
-    # fieldbl = Field(3, 1, 2, 3)
-    # fieldbr = Field(2, 2, 3, 1)
+def main():    
+    ### 2x2 Grid
+    #grid = twoByTwoGrid()
 
-    # grid = [[fieldtl, fieldtr],
-    #         [fieldbl, fieldbr]]
+    ### 4x4 Grid
+    #grid = fourByFourGrid()    
 
-    # 4x4 Field
+    ### Random grid generator
+    width = 7
+    height = 7
+    grid = randomGrid(width, height)
+
+    # add all positions to the fields
+    for i in range(len(grid)):
+       for j in range(len(grid[i])):
+           grid[i][j].position = (i, j)
+
+    # set the start node to the node at (0,0)
+    start = grid[0][0]
+    # set the end node to the node at (m, n)
+    end = grid[len(grid)-1][len(grid[len(grid) - 1]) - 1]
+
+    # start the algorithm
+    path = astar(grid, start, end)
+
+    # print path
+    if path is not None:
+        for element in path:
+            print(element)
+        printGrid(grid)
+    else:
+        print("unsolvable")
+
+# prints grid row by row
+def printGrid(grid):
+    top = []
+    left = []
+    right = []
+    bottom = []
+    for x in grid:
+        for line in x:
+            top.append(line.u)
+            left.append(line.l)
+            right.append(line.r)
+            bottom.append(line.d)
+
+    dim = np.shape(grid)
+
+    # for height of grid
+    for _ in range(dim[1]):
+        topRow = ""
+        middleRow = ""
+        bottomRow = ""
+
+        divider = "-" * dim[0] * 7
+
+        print(divider)
+
+
+        # for loops to get all top elements per row
+        for _ in range(dim[0]):
+            topRow += "|  %s  |" % top.pop(0)
+
+        # for loops to get all middle elements per row
+        for _ in range(dim[0]):
+            middleRow += "|%s   %s|" % (left.pop(0), right.pop(0))
+
+        # for loops to get all bottom elements per row
+        for _ in range(dim[0]):
+            bottomRow += "|  %s  |" % bottom.pop(0)
+
+        print(topRow)
+        print(middleRow)
+        print(bottomRow)
+
+        print(divider)
+
+
+def fourByFourGrid():
     field00 = Field(2, 3, 3, 3)
     field01 = Field(2, 3, 1, 3)
     field02 = Field(2, 1, 3, 3)
@@ -210,24 +294,35 @@ def main():
             [field20, field21, field22, field23],
             [field30, field31, field32, field33]]
 
-    # add all positions to the fields
+    return grid
+
+def twoByTwoGrid():
+    fieldtl = Field(2, 1, 3, 2)
+    fieldtr = Field(2, 2, 1, 1)
+    fieldbl = Field(3, 1, 2, 3)
+    fieldbr = Field(2, 2, 3, 1)
+
+    grid = [[fieldtl, fieldtr],
+            [fieldbl, fieldbr]]
+
+    return grid
+
+# returns a Field with random u, l, d, r attributes
+def randomField():
+    return Field(random.randrange(1,4,1),random.randrange(1,4,1),random.randrange(1,4,1),random.randrange(1,4,1))
+
+# creates random grid of Field
+def randomGrid(w, h):
+    grid = np.full((w, h), randomField())
     for i in range(len(grid)):
         for j in range(len(grid[i])):
-            grid[i][j].position = (i, j)
-
-    # set the start node to the node at (0,0)
-    start = grid[0][0]
-    # set the end node to the node at (m, n)
-    end = grid[len(grid)-1][len(grid[len(grid) - 1]) - 1]
-
-    # start the algorithm
-    path = astar(grid, start, end)
-
-    # print path
-    for element in path:
-        print(element)
+            grid[i][j] = randomField()
+    return grid
 
 
 # launcher
 if __name__ == '__main__':
+    main()
+    main()
+    main()
     main()
