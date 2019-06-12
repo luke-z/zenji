@@ -24,10 +24,7 @@ class Field():
 
     def __eq__(self, other):
         return self.u == other.u and self.r == other.r and self.d == other.d and self.l == other.l and \
-               self.position == other.position and self.rotations == other.rotations and self.parent == other.parent
-
-    def print(self):
-        return [[" ","%s" % (self.u)," "],["%s" % (self.l)," ","%s" % (self.r)],[" ","%s" % (self.d)," "]]
+            self.position == other.position and self.rotations == other.rotations and self.parent == other.parent
 
 
 def rotate(node, n):
@@ -89,7 +86,8 @@ def astar(grid, start, end):
             # go through all nodes to check if connections are valid
             while analysed_node.parent is not None:
                 # calculate the previous move: (1,0) is a downwards move, (0,1) is a rightwards move
-                previous_move = tuple(np.subtract((analysed_node.position), (analysed_node.parent.position)))
+                previous_move = tuple(np.subtract(
+                    (analysed_node.position), (analysed_node.parent.position)))
 
                 # check if the current node and its parent are connected in a valid way
                 if previous_move == (1, 0):
@@ -180,7 +178,8 @@ def astar(grid, start, end):
             # the g value is increment by one
             child.g = current_node.g + 1
             # the h value consists of the sum of the x, y and amount of rotations of the child
-            child.h = (((child.position[0] - end_node.position[0]) ** 2) + ((child.position[1] - end_node.position[1]) ** 2)) ** child.rotations
+            child.h = (((child.position[0] - end_node.position[0]) ** 2) + (
+                (child.position[1] - end_node.position[1]) ** 2)) ** child.rotations
             # set f to be the sum of g and h
             child.f = child.g + child.h
 
@@ -193,22 +192,22 @@ def astar(grid, start, end):
             open_list.append(child)
 
 
-def main():    
-    ### 2x2 Grid
+def main():
+    # 2x2 Grid
     #grid = twoByTwoGrid()
 
-    ### 4x4 Grid
-    #grid = fourByFourGrid()    
+    # 4x4 Grid
+    #grid = fourByFourGrid()
 
-    ### Random grid generator
+    # Random grid generator
     width = 4
     height = 4
     grid = randomGrid(width, height)
 
     # add all positions to the fields
     for i in range(len(grid)):
-       for j in range(len(grid[i])):
-           grid[i][j].position = (i, j)
+        for j in range(len(grid[i])):
+            grid[i][j].position = (i, j)
 
     # set the start node to the node at (0,0)
     start = grid[0][0]
@@ -224,9 +223,10 @@ def main():
             print(element)
         printGrid(grid)
     else:
-        print("unsolvable")
+        print('unsolvable')
 
-# prints grid row by row
+
+# prints grid to command line, row by row
 def printGrid(grid):
     top = []
     left = []
@@ -251,16 +251,15 @@ def printGrid(grid):
 
         print(divider)
 
-
-        # for loops to get all top elements per row
+        # for loop to get all top elements per row
         for _ in range(dim[0]):
             topRow += "|  %s  |" % top.pop(0)
 
-        # for loops to get all middle elements per row
+        # for loop to get all middle elements per row
         for _ in range(dim[0]):
             middleRow += "|%s   %s|" % (left.pop(0), right.pop(0))
 
-        # for loops to get all bottom elements per row
+        # for loop to get all bottom elements per row
         for _ in range(dim[0]):
             bottomRow += "|  %s  |" % bottom.pop(0)
 
@@ -296,6 +295,7 @@ def fourByFourGrid():
 
     return grid
 
+
 def twoByTwoGrid():
     fieldtl = Field(2, 1, 3, 2)
     fieldtr = Field(2, 2, 1, 1)
@@ -307,9 +307,11 @@ def twoByTwoGrid():
 
     return grid
 
-# returns a Field with random u, l, d, r attributes
+
+# returns a Field with random u, r, d, l attributes
 def randomField():
-    return Field(random.randrange(1,4,1),random.randrange(1,4,1),random.randrange(1,4,1),random.randrange(1,4,1))
+    return Field(random.randrange(1, 4, 1), random.randrange(1, 4, 1), random.randrange(1, 4, 1), random.randrange(1, 4, 1))
+
 
 # creates random grid of Field
 def randomGrid(w, h):
