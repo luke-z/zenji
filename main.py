@@ -315,7 +315,7 @@ def randomField():
 
 # creates random grid of Field
 def randomGrid(w, h):
-    grid = np.full((w, h), randomField())
+    grid = np.zeros((w, h), dtype=Field)
     for i in range(len(grid)):
         for j in range(len(grid[i])):
             grid[i][j] = randomField()
